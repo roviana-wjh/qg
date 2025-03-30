@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录/注册页面</title>
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        display: flex;
+        justify-content: center; //横向
+        align-items: center;    //纵向
+        height: 100vh;
+        margin: 0;
+    }
+    .auth-container {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+
+        width: 300px;
+        text-align: center;
+    }
+    .auth-container h2 {
+        margin-bottom: 1.5rem;
+        color: #333;
+    }
+    .toggle-buttons {
+        margin-bottom: 1.5rem;
+    }
+    .toggle-buttons button {
+        background: none;
+        border: none;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        font-size: 1rem;
+        color: #666;
+        transition: color 0.3s;
+    }
+    .toggle-buttons button.active {
+        color: #007bff;
+        border-bottom: 2px solid #007bff;
+    }
+    .form-group {
+        margin-bottom: 1rem;
+        text-align: left;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #555;
+    }
+    .form-group input {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+    .form-group input:focus {
+        border-color: #007bff;
+        outline: none;
+    }
+    .error-message {
+        color: red;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    .submit-button {
+        width: 100%;
+        padding: 0.75rem;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .submit-button:hover {
+        background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="auth-container">
+    <h2>{{ isLogin ? '登录' : '注册' }}</h2>
+    <div class="toggle-buttons">
+      <button :class="{ active: isLogin }" @click="toggleForm(true)">登录</button>
+      <button :class="{ active: !isLogin }" @click="toggleForm(false)">注册</button>
+    </div>
+    <form @submit.prevent="submitForm">
+      <div class="form-group">
+        <label for="email">邮箱</label>
+        <input type="email" id="email" v-model="form.email" required />
+        <span v-if="!form.email && submitted" class="error-message">邮箱是必填项</span>
+      </div>
+      <div class="form-group">
+        <label for="password">密码</label>
+        <input type="password" id="password" v-model="form.password" required />
+        <span v-if="!form.password && submitted" class="error-message">密码是必填项</span>
+      </div>
+      <div class="form-group" v-if="!isLogin">
+        <label for="confirmPassword">确认密码</label>
+        <input type="password" id="confirmPassword" v-model="form.confirmPassword" required />
+
+      </div><span v-if="!form.confirmPassword && submitted" class="error-message">确认密码是必填项</span>
+      <div class="form-group" v-if="!isLogin">
+        <label for="phone">手机号</label>
+        <input type="tel" id="phone" v-model="form.phone" required />
+        <span v-if="!form.phone && submitted" class="error-message">手机号是必填项</span>
+      </div>
+      <button type="submit" class="submit-button">{{ isLogin ? '登录' : '注册' }}</button>
+    </form>
+  </div>
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script>
+  const { createApp } = Vue;
+
+  const app = createApp({
+      data() {
+          return {
+              isLogin: true, // 当前是登录还是注册
+              submitted: false, // 是否已提交表单
+              form: {
+                  email: '',
+                  password: '',
+                  confirmPassword: '',
+                  phone: ''
+              }
+          };
+      },
+      methods: {
+          // 切换登录/注册表单
+          toggleForm(isLogin) {
+              this.isLogin = isLogin;
+              this.submitted = false;
+              this.form = {
+                  email: '',
+                  password: '',
+                  confirmPassword: '',
+                  phone: ''
+              };
+          },
+          // 提交表单
+          submitForm() {
+              this.submitted = true;
+              if (this.isLogin) {
+                  if (this.form.email && this.form.password) {
+                      alert('登录成功');
+                  }
+              } else {
+                  if (this.form.email && this.form.password && this.form.confirmPassword && this.form.phone) {
+                      if (this.form.password !== this.form.confirmPassword) {
+                          alert('密码和确认密码不一致');
+                      } else {
+                          alert('注册成功');
+                      }
+                  }
+              }
+          }
+      }
+  });
+
+  app.mount('#app');
+</script>
+</body>
+</html>
