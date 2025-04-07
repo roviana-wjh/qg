@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>课程学生查询</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    .auth-container {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        width: 300px;
+        text-align: center;
+        margin: 0 auto;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .auth-container h2 {
+        margin-bottom: 1.5rem;
+        color: #333;
+    }
+    pre {
+        background: #f5f5f5;
+        padding: 1rem;
+        border-radius: 4px;
+        text-align: left;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+    button {
+        padding: 8px 16px;
+        background: #42b983;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 1rem;
+    }
+    button:hover {
+        background: #369f6b;
+    }
+    .error {
+        color: red;
+        margin-top: 1rem;
+    }
+    input {
+        width: 100%;
+        padding: 8px;
+        margin: 8px 0;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+<div id="myCourse">
+  <div class="auth-container">
+    <h2>课程学生查询</h2>
+    <label for="id">请输入课程ID</label>
+    <input type="number" id="id" v-model="form.id" required>
+    <button @click="fetchResults">获取数据</button>
+    <div v-if="loading">加载中...</div>
+    <div v-if="error" class="error">{{ error }}</div>
+    <div v-if="result" class="result-box">
+      <h3>查询结果</h3>
+      <pre>{{ JSON.stringify(result, null, 2) }}</pre>
+    </div>
+  </div>
+</div>
+
+<script>
+  const { createApp } = Vue;
+
+  createApp({
+      data() {
+          return {
+              form: { id: null },
+              result: null,
+              error: null,
+              loading: false
+          }
+      },
+      methods: {
+          fetchResults() {
+              if (!this.form.id) {
+                  this.error = "请输入课程ID";
+                  return;
+              }
+
+              this.loading = true;
+              this.error = null;
+              this.result = null;
+
+              axios.get('/qg02/admin', {
+                  params: {
+                      action: "getStudentBycourse",
+                      id: this.form.id
+                  }
+              })
+              .then(response => {
+                  this.result = response.data;
+              })
+              .catch(error => {
+                  this.error = "查询失败: " +
+                      (error.response?.data?.error ||
+                       error.response?.statusText ||
+                       "请检查网络连接");
+                  console.error("Error:", error);
+              })
+              .finally(() => {
+                  this.loading = false;
+              });
+          }
+      }
+  }).mount("#myCourse");
+</script>
+</body>
+</html>

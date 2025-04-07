@@ -1,0 +1,230 @@
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录/注册页面</title>
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+    .auth-container {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        width: 300px;
+        text-align: center;
+    }
+    .toggle-buttons {
+        margin-bottom: 1.5rem;
+    }
+    .toggle-buttons button {
+        background: none;
+        border: none;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        font-size: 1rem;
+        color: #666;
+        transition: color 0.3s;
+    }
+    .toggle-buttons button.active {
+        color: #007bff;
+        border-bottom: 2px solid #007bff;
+    }
+    .form-group {
+        margin-bottom: 1rem;
+        text-align: left;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #555;
+    }
+    .form-group input {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+    .form-group input:focus {
+        border-color: #007bff;
+        outline: none;
+    }
+    .error-message {
+        color: red;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    .submit-button {
+        width: 100%;
+        padding: 0.75rem;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .submit-button:hover {
+        background-color: #0056b3;
+    }
+    .server-error {
+        color: red;
+        margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="auth-container">
+    <h2>{{ isLogin ? '登录' : '注册' }}</h2>
+    <div class="toggle-buttons">
+      <button :class="{ active: isLogin }" @click="toggleForm(true)">登录</button>
+      <button :class="{ active: !isLogin }" @click="toggleForm(false)">注册</button>
+    </div>
+
+    <!-- 服务器错误提示 -->
+    <div v-if="serverError" class="server-error">{{ serverError }}</div>
+
+    <form @submit.prevent="submitForm">
+      <template v-if="isLogin">
+        <div class="form-group">
+          <label for="username">用户名</label>
+          <input type="text" id="username" v-model="loginForm.username" required />
+          <span v-if="submitted && !loginForm.username" class="error-message">用户名是必填项</span>
+        </div>
+        <div class="form-group">
+          <label for="password">密码</label>
+          <input type="password" id="password" v-model="loginForm.password" required />
+          <span v-if="submitted && !loginForm.password" class="error-message">密码是必填项</span>
+        </div>
+        <div class="form-group">
+          <label>选择角色</label>
+          <div>
+            <label><input type="radio" value="student" v-model="loginForm.role" /> 学生</label>
+            <label><input type="radio" value="admin" v-model="loginForm.role" /> 管理员</label>
+          </div>
+          <span v-if="submitted && !loginForm.role" class="error-message">请选择角色</span>
+        </div>
+
+      </template>
+      <template v-else>
+        <div class="form-group">
+          <label for="regUsername">用户名</label>
+          <input type="text" id="regUsername" v-model="registerForm.username" required />
+          <span v-if="submitted && !registerForm.username" class="error-message">用户名是必填项</span>
+        </div>
+        <div class="form-group">
+          <label for="regPassword">密码</label>
+          <input type="password" id="regPassword" v-model="registerForm.password" required />
+          <span v-if="submitted && !registerForm.password" class="error-message">密码是必填项</span>
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword">确认密码</label>
+          <input type="password" id="confirmPassword" v-model="registerForm.confirmPassword" required />
+          <span v-if="submitted && registerForm.password !== registerForm.confirmPassword"
+                class="error-message">两次密码不一致</span>
+        </div>
+        <div class="form-group">
+          <label for="email">邮箱（可选）</label>
+          <input type="email" id="email" v-model="registerForm.email" />
+        </div>
+      </template>
+
+      <button type="submit" class="submit-button">{{ isLogin ? '登录' : '注册' }}</button>
+    </form>
+  </div>
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+  const { createApp } = Vue;
+
+  createApp({
+    data() {
+      return {
+        isLogin: true,
+        submitted: false,
+        serverError: null,
+        loginForm: {
+  username: '',
+  password: '',
+  role: ''
+},
+
+        registerForm: {
+          username: '',
+          password: '',
+          confirmPassword: '',
+          email: ''
+        }
+      }
+    },
+    methods: {
+      toggleForm(isLogin) {
+        this.isLogin = isLogin;
+        this.submitted = false;
+        this.serverError = null;
+      },
+
+      async submitForm() {
+  this.submitted = true;
+  this.serverError = null;
+  if (this.isLogin) {
+    if (!this.loginForm.username || !this.loginForm.password || !this.loginForm.role) {
+      return;
+    }
+  } else {
+    if (!this.registerForm.username || !this.registerForm.password ||
+        this.registerForm.password !== this.registerForm.confirmPassword) {
+      return;
+    }
+  }
+
+  try {
+    const url = '/qg02/aa';
+    const action = this.isLogin ? 'login' : 'register';
+    const formData = this.isLogin ? this.loginForm : this.registerForm;
+const response = await axios.post(url, {
+  action: action,
+  username: formData.username,
+  password: formData.password,
+  email: formData.email,
+  role: this.isLogin ? formData.role : null,
+},{
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (response.data.status === "success") {
+      if (this.isLogin && this.loginForm.role === 'student') {
+        window.location.href = 'Student_login.html';
+      } else if (this.isLogin && this.loginForm.role === 'admin') {
+        window.location.href = 'Admin_login.html';
+      }
+    } else {
+      this.serverError = response.data.error || "操作失败";
+    }
+  } catch (err) {
+    console.error("请求错误:", err);
+    if (err.response) {
+      this.serverError = err.response.data?.error || `服务器错误: ${err.response.status}`;
+    } else if (err.request) {
+      this.serverError = "无法连接到服务器";
+    } else {
+      this.serverError = "请求失败: " + err.message;
+    }
+  }
+}
+    }
+  }).mount("#app");
+</script>
+</body>
+</html>

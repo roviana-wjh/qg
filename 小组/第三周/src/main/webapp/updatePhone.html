@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>修改学生手机号</title>
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+    .container {
+        background-color: white;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        width: 400px;
+        text-align: center;
+    }
+    .form-group {
+        margin-bottom: 1rem;
+        text-align: left;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #555;
+    }
+    .form-group input {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+    .form-group input:focus {
+        border-color: #007bff;
+        outline: none;
+    }
+    .submit-button {
+        width: 100%;
+        padding: 0.75rem;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        margin-top: 1rem;
+    }
+    .submit-button:hover {
+        background-color: #0056b3;
+    }
+    .message {
+        margin-top: 1rem;
+        color: green;
+    }
+    .error {
+        margin-top: 1rem;
+        color: red;
+    }
+  </style>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+<div class="container" id="app">
+  <h1>修改学生手机号</h1>
+  <form @submit.prevent="submitForm">
+    <div class="form-group">
+      <label for="id">学生ID</label>
+      <input type="number" id="id" v-model="form.id" required>
+      <label for="newPhone">新手机号</label>
+      <input type="tel" id="newPhone" v-model="form.newPhone" required>
+    </div>
+    <button type="submit" class="submit-button">提交</button>
+  </form>
+  <div v-if="message" class="message">{{ message }}</div>
+  <div v-if="error" class="error">{{ error }}</div>
+</div>
+
+<script>
+  const { createApp } = Vue;
+
+  createApp({
+      data() {
+          return {
+              form: {
+                  id: "",
+                  newPhone: ""
+              },
+              message: "",
+              error: ""
+          };
+      },
+      methods: {
+          async submitForm() {
+              if (!this.form.id || !this.form.newPhone) {
+                  this.error = "请输入学生ID和新手机号";
+                  return;
+              }
+
+              try {
+                  const response = await axios.post("/admin", {
+                       action: "updatePhone",
+                      id: this.form.id,
+                      newPhone: this.form.newPhone
+                  });
+                  this.message = response.data.message || "修改成功";
+                  this.error = "";
+              } catch (err) {
+                  console.error("请求失败:", err);
+                  this.error =  "修改失败，请稍后再试";
+                  this.message = "";
+              }
+          }
+      }
+  }).mount('#app');
+</script>
+</body>
+</html>
